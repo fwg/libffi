@@ -176,6 +176,7 @@ proc libffi_target_compile { source dest type options } {
     global libffi_include
     global target_triplet
     global compiler_vendor
+    global CPPFLAGS
 
     if { [target_info needs_status_wrapper]!="" && [info exists gluefile] } {
 	lappend options "libs=${gluefile}"
@@ -197,6 +198,11 @@ proc libffi_target_compile { source dest type options } {
     if { [istarget "*-*-darwin9*"] || [istarget "*-*-darwin1*"]
 	 || [istarget "*-*-darwin2*"] } {
 	lappend options "additional_flags=-Wl,-allow_stack_execute"
+    }
+
+    # MSVC needs build flags passed for correct linkage of lib/dll
+    if { [info exists CPPFLAGS] && [string match "microsoft" $compiler_vendor] } {
+        lappend options "additional_flags=${CPPFLAGS}"
     }
 
     # If you're building the compiler with --prefix set to a place

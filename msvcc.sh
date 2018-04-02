@@ -53,6 +53,7 @@ safeseh="-safeseh"
 output=
 libpaths=
 libversion=7
+linkffi=
 verbose=
 
 while [ $# -gt 0 ]
@@ -60,7 +61,7 @@ do
   case $1
   in
     --verbose)
-      $verbose=1
+      verbose=1
       shift 1
     ;;
     --version)
@@ -168,11 +169,13 @@ do
     ;;
     -L)
       p=$(cygpath -m $2)
+      libpaths="$libpaths $p"
       linkargs="$linkargs -LIBPATH:$p"
       shift 2
     ;;
     -L*)
       p=$(cygpath -m ${1#-L})
+      libpaths="$libpaths $p"
       linkargs="$linkargs -LIBPATH:$p"
       shift 1
     ;;
@@ -185,7 +188,7 @@ do
       case $1
       in
         -lffi)
-          linkargs="$linkargs lib${1#-l}-${libversion}.lib"
+          linkffi=1
           ;;
         *)
           # ignore other libraries like -lm, hope they are
@@ -260,6 +263,30 @@ do
     ;;
   esac
 done
+
+if [ -n "$linkffi" ]; then
+  versioned_lib="libffi-$libversion.lib"
+  unversioned_lib="libffi.lib"
+  found=
+
+  for path in $libpaths; do
+    if [ -e "$path/$versioned_lib" ]; then
+      found="$versioned_lib"
+      break
+    fi
+    if [ -e "$path/$unversioned_lib" ]; then
+      found="$unversioned_lib"
+      break
+    fi
+  done
+
+  if [ -n "$found" ]; then
+    linkargs="$linkargs $found"
+  else
+    echo "Error: could not find libffi to link against.";
+    exit 1;
+  fi
+fi
 
 if [ -n "$linkargs" ]; then
 

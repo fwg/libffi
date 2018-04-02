@@ -18,6 +18,7 @@ dg-init
 libffi-init
 
 global srcdir subdir
+global compiler_vendor
 
 if { [string match $compiler_vendor "microsoft"] } {
     # -wd4005  macro redefinition
