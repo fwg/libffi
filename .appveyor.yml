@@ -19,6 +19,9 @@ environment:
     CYG_MIRROR: http://mirrors.kernel.org/sourceware/cygwin/
   matrix:
     - VSVER: 12
+      BUILD_SHARED: yes
+    - VSVER: 12
+      BUILD_SHARED: no
 
 install:
   - ps: >-
@@ -39,12 +42,7 @@ install:
   - call "%VSCOMNTOOLS%\..\..\VC\vcvarsall.bat" %VCVARS_PLATFORM%
 
 build_script:
-  - c:\cygwin\bin\sh -lc "(cd $OLDPWD; ./autogen.sh;)"
-  - c:\cygwin\bin\sh -lc "(cd $OLDPWD; ./configure CC='/cygdrive/c/projects/libffi/msvcc.sh -m64' CXX='/cygdrive/c/projects/libffi/msvcc.sh -m64' LD='link' CPP='cl -nologo -EP' CXXCPP='cl -nologo -EP' CPPFLAGS='-DFFI_BUILDING_DLL' AR='/cygdrive/c/projects/libffi/.travis/ar-lib lib' NM='dumpbin -symbols' STRIP=':' --build=$BUILD --host=$HOST;)"
-  - c:\cygwin\bin\sh -lc "(cd $OLDPWD; cp src/x86/ffitarget.h include; make; find .;)"
-  - c:\cygwin\bin\sh -lc "(cd $OLDPWD; cp `find . -name 'libffi-?.dll'` $HOST/testsuite/; make check; cat `find ./ -name libffi.log`)"
+  - c:\cygwin\bin\sh -lc "(cd $OLDPWD; ./autogen.sh; ./.appveyor/build.sh;)"
 
-# FIXME: "make check" currently fails.  It just looks like msvcc needs
-# to learn about -L and -l options.  If you add "make check; cat `find
-# ./ -name libffi.log" to the end of that build command you'll see
-# what I mean.
+test_script:
+  - c:\cygwin\bin\sh -lc "(cd /cygdrive/c/projects/libffi/; ./.appveyor/test.sh;)"
