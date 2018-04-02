@@ -129,9 +129,17 @@ typedef struct _ffi_type
 /* The externally visible type declarations also need the MSVC DLL
    decorations, or they will not be exported from the object file.  */
 #if defined LIBFFI_HIDE_BASIC_TYPES
-# define FFI_EXTERN FFI_API
+# if defined FFI_BUILDING_DLL
+#  define FFI_EXTERN FFI_API
+# else
+#  define FFI_EXTERN
+# endif
 #else
-# define FFI_EXTERN extern FFI_API
+# if defined FFI_BUILDING_DLL
+#  define FFI_EXTERN extern FFI_API
+# else
+#  define FFI_EXTERN extern
+# endif
 #endif
 
 #ifndef LIBFFI_HIDE_BASIC_TYPES
